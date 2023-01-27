@@ -1,0 +1,35 @@
+name: Docker CI build
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: docker setup
+        run: make docker-setup
+
+      - name: docker up
+        run: make docker-up
+
+      - name: wait for mysql to become available
+        run: sleep 30
+
+      - name: (debug) docker mysql logs
+        run: docker logs coding-challenge_mysql_1
+
+      - name: (debug) docker mysql schema info
+        run: docker exec coding-challenge_mysql_1 mysql -u root -proot -e "SHOW databases;" -h 127.0.0.1
+
+      - name: application setup
+        run: make setup
+
+      - name: code style
+        run: make phpcs
+
+      - name: tests
+        run: make test
